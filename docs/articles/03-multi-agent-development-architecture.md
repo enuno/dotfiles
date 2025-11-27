@@ -688,10 +688,11 @@ class MCPOAuthClient {
     return response.json();
   }
 }
-
+```
 **Secrets Management Best Practices**[62][64][70]:
 
 1. **Never Store Secrets in Configuration Files**:
+```
    // ❌ BAD
    {
      "mcpServers": {
@@ -709,8 +710,9 @@ class MCPOAuthClient {
        }
      }
    }
-
+```
 2. **Use Platform Secret Managers**:
+```
    class SecretResolver {
      async resolve(secretRef: string): string {
        if (secretRef.startsWith('aws:secretsmanager:')) {
@@ -723,8 +725,9 @@ class MCPOAuthClient {
        throw new Error(`Unknown secret reference: ${secretRef}`);
      }
    }
-
+```
 3. **Implement Least-Privilege Scopes**[67]:
+```
    const TOOL_SCOPE_REQUIREMENTS = {
      "read_file": ["filesystem:read"],
      "write_file": ["filesystem:write"],
