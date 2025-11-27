@@ -69,6 +69,7 @@ This research report provides a comprehensive technical framework for architecti
 **Key Components**[21][22][25]:
 
 1. **AgentCard (Capability Advertisement)**:
+```
    {
      "id": "agent-id",
      "name": "Web Research Agent",
@@ -79,8 +80,9 @@ This research report provides a comprehensive technical framework for architecti
        "scopes": ["read:data"]
      }
    }
-
+```
 2. **Task Schema**:
+```
    {
      "taskId": "unique-identifier",
      "agentRole": "builder|validator|architect",
@@ -89,7 +91,7 @@ This research report provides a comprehensive technical framework for architecti
      "expectedOutput": {"format": "code|documentation"},
      "metadata": {"priority": "high", "complexity": "moderate"}
    }
-
+```
 3. **Message Exchange Protocol**:
    - **Discovery**: Client requests AgentCard to understand capabilities
    - **Task Assignment**: Structured task with metadata and context
@@ -102,8 +104,9 @@ This research report provides a comprehensive technical framework for architecti
 
 **Layered Architecture**:
 
+```
 ┌──────────────────────────────────────────────────────────────┐
-│                    Development Environment                    │
+│                    Development Environment                   │
 │              (IDE: VS Code, Cursor, Claude Code)             │
 └──────────────────────────────────────────────────────────────┘
                               │
@@ -125,6 +128,7 @@ This research report provides a comprehensive technical framework for architecti
 │ • Specialist  │    │ • TS/JS LS   │    │ • File System    │
 │ • Validator   │    │ • Go LS      │    │ • Web APIs       │
 └───────────────┘    └──────────────┘    └──────────────────┘
+```
 
 **Integration Principles**[8][19][29]:
 
@@ -152,7 +156,7 @@ This research report provides a comprehensive technical framework for architecti
 **Overview**: A central manager agent coordinates multiple specialized agents, delegating tasks based on capability matching[21][25][29][65][68].
 
 **Architecture**:
-
+```
                     ┌─────────────────────┐
                     │   Manager Agent     │
                     │   (Orchestrator)    │
@@ -173,9 +177,9 @@ This research report provides a comprehensive technical framework for architecti
         │ • LSP    │  │ • LSP    │  │ • MCP    │
         │ • MCP    │  │ • MCP    │  │          │
         └──────────┘  └──────────┘  └──────────┘
-
+```
 **Implementation Pattern**[21][25]:
-
+```
 class ManagerAgent:
     def __init__(self):
         self.agents = {}  # AgentID -> AgentCard
@@ -211,7 +215,7 @@ class ManagerAgent:
         
         # 5. Synthesize results
         return self.synthesize(results)
-
+```
 **Key Design Decisions**[65][68]:
 
 - **Manager Intelligence**: Use more capable models (GPT-4, Claude Opus) for managers
@@ -224,7 +228,7 @@ class ManagerAgent:
 **Overview**: Dedicated agents that wrap specific MCP servers, providing semantic interfaces to specialized functionality[25][39][42].
 
 **Architecture**:
-
+```
 ┌─────────────────────────────────────────────┐
 │          General-Purpose Agent              │
 │    (Planning, Reasoning, Coordination)      │
@@ -233,13 +237,13 @@ class ManagerAgent:
         ┌───────────┼───────────┐
         │           │           │
         ▼           ▼           ▼
-┌──────────┐  ┌──────────┐  ┌──────────┐
-│ Database │  │   Git    │  │  Web     │
+┌───────────┐  ┌──────────┐  ┌──────────┐
+│ Database  │  │   Git    │  │  Web     │
 │ Specialist│  │Specialist│  │Specialist│
-│          │  │          │  │          │
-│ MCP: DB  │  │ MCP: Git │  │ MCP: HTTP│
-└──────────┘  └──────────┘  └──────────┘
-
+│           │  │          │  │          │
+│ MCP: DB   │  │ MCP: Git │  │ MCP: HTTP│
+└───────────┘  └──────────┘  └──────────┘
+```
 **Value Proposition**:
 - **Semantic Abstraction**: Tool-specialist agents understand domain semantics, not just tool APIs
 - **Error Handling**: Built-in retry logic and failure recovery specific to tool domain
@@ -247,7 +251,7 @@ class ManagerAgent:
 - **Safety Boundaries**: Enforce tool-specific constraints (read-only modes, rate limits)
 
 **Implementation Example**[39][42]:
-
+```
 class DatabaseSpecialistAgent {
     private mcpClient: MCPClient;
     private lspClient: LSPClient;  // For SQL validation
@@ -290,7 +294,7 @@ class DatabaseSpecialistAgent {
         }
     }
 }
-
+```
 ### 2.3 Multi-Server Topology Pattern
 
 **Overview**: Coordinating agents that consume multiple MCP servers simultaneously, selecting appropriate tools dynamically[39][42][75].
@@ -313,7 +317,7 @@ class DatabaseSpecialistAgent {
    - Supports flexible, ad-hoc tool composition
 
 **Virtual MCP Server Example**[42]:
-
+```
 # virtual-servers/frontend-dev.yaml
 name: "frontend-development"
 description: "Tools for frontend engineering workflows"
@@ -336,9 +340,9 @@ mcp_servers:
 authentication:
   type: "shared_oauth"
   scopes: ["design:read", "repo:write", "test:execute"]
-
+```
 **Routing Implementation**[42]:
-
+```
 class VirtualMCPServer {
     private serverMappings: Map<string, MCPClient>;
     
@@ -357,39 +361,39 @@ class VirtualMCPServer {
         return await mcpClient.callTool(toolName, params, { auth: authToken });
     }
 }
-
+```
 ### 2.4 Developer-in-the-Loop IDE Integration
 
 **Overview**: Continuous improvement loop where human edits, LSP feedback, ACP-coordinated agents, and MCP tools interact seamlessly[6][35][46][61][75].
 
 **Architecture**:
-
+```
 ┌──────────────────────────────────────────────────────────────┐
 │                     IDE (VS Code, Cursor)                    │
 │                                                              │
-│  ┌────────────┐    ┌────────────┐    ┌────────────┐        │
-│  │   Editor   │◄──►│ LSP Client │◄──►│LSP Servers │        │
-│  │            │    │            │    │(Diagnostics│        │
-│  │ Human Edits│    │  (Inline   │    │ Completion)│        │
-│  └────────────┘    │  Feedback) │    └────────────┘        │
-│         │          └────────────┘                           │
-│         │                 │                                 │
-│         ▼                 ▼                                 │
-│  ┌─────────────────────────────────┐                       │
-│  │     Agent Coordination UI       │                       │
-│  │  • Approve/Reject Changes       │                       │
-│  │  • View Agent Plans             │                       │
-│  │  • Trigger Agent Tasks          │                       │
-│  └─────────────────────────────────┘                       │
-│         │                                                   │
-└─────────┼───────────────────────────────────────────────────┘
+│  ┌────────────┐    ┌────────────┐    ┌────────────┐          │
+│  │   Editor   │◄──►│ LSP Client │◄──►│LSP Servers │          │
+│  │            │    │            │    │(Diagnostics│          │
+│  │ Human Edits│    │  (Inline   │    │ Completion)│          │
+│  └────────────┘    │  Feedback) │    └────────────┘          │
+│         │          └────────────┘                            │
+│         │                 │                                  │
+│         ▼                 ▼                                  │
+│  ┌─────────────────────────────────┐                         │
+│  │     Agent Coordination UI       │                         │
+│  │  • Approve/Reject Changes       │                         │
+│  │  • View Agent Plans             │                         │
+│  │  • Trigger Agent Tasks          │                         │
+│  └─────────────────────────────────┘                         │
+│         │                                                    │
+└─────────┼────────────────────────────────────────────────────┘
           │
           ▼
 ┌─────────────────────────────────────────┐
 │         ACP Client (Agent Manager)      │
-│  • Spawns coding agents in worktrees   │
+│  • Spawns coding agents in worktrees    │
 │  • Coordinates parallel development     │
-│  • Aggregates agent outputs            │
+│  • Aggregates agent outputs             │
 └─────────────────────────────────────────┘
           │
           ├────────────────┬──────────────┐
@@ -401,9 +405,9 @@ class VirtualMCPServer {
    │ • LSP     │    │ • LSP     │   │ • LSP     │
    │ • MCP     │    │ • MCP     │   │ • MCP     │
    └───────────┘    └───────────┘   └───────────┘
-
+```
 **Git Worktree Pattern**[35][75]:
-
+```
 # Create isolated workspace for each agent
 git worktree add ../worktree-agent-1 feature/agent-1-attempt
 git worktree add ../worktree-agent-2 feature/agent-2-attempt
@@ -413,7 +417,7 @@ git worktree add ../worktree-agent-3 feature/agent-3-attempt
 cd ../worktree-agent-1 && claude-code --session agent-1 &
 cd ../worktree-agent-2 && claude-code --session agent-2 &
 cd ../worktree-agent-3 && claude-code --session agent-3 &
-
+```
 **Benefits**[35][75]:
 - **Stochastic Diversity**: Multiple agents produce distinct solutions to same problem
 - **Parallel Development**: 3-10x productivity through concurrent execution
@@ -421,7 +425,7 @@ cd ../worktree-agent-3 && claude-code --session agent-3 &
 - **Best-of-N Selection**: Compare results and cherry-pick best implementation
 
 **Human Oversight Pattern**[46][61]:
-
+```
 class DeveloperInTheLoopWorkflow {
     async executeWithApproval(task: DevelopmentTask) {
         // 1. Agent proposes changes using LSP + MCP
@@ -448,7 +452,7 @@ class DeveloperInTheLoopWorkflow {
         }
     }
 }
-
+```
 ---
 
 ## 3. Dynamic MCP Server Configuration and Discovery
@@ -456,7 +460,7 @@ class DeveloperInTheLoopWorkflow {
 ### 3.1 Environment-Based Configuration Patterns
 
 **Configuration Hierarchy**[39][62][64]:
-
+```
 System-Wide Config
   ↓
 User-Level Config  
@@ -464,9 +468,9 @@ User-Level Config
 Project-Level Config
   ↓
 Runtime Dynamic Config
-
+```
 **Configuration File Structure**[39]:
-
+```
 {
   "$schema": "https://modelcontextprotocol.io/schemas/2025-09-29/mcp-config.schema.json",
   "mcpServers": {
@@ -497,22 +501,25 @@ Runtime Dynamic Config
     }
   }
 }
-
+```
 **Environment Variable Patterns**[39][64]:
 
 1. **Direct Environment Variables**:
+```
    export DATABASE_URI="postgresql://user:pass@host/db"
    export GITHUB_TOKEN="ghp_..."
-
+```
 2. **Secret Management Integration**:
+```
    # AWS Secrets Manager
    export DATABASE_URI=$(aws secretsmanager get-secret-value \
      --secret-id prod/database/uri --query SecretString --output text)
    
    # HashiCorp Vault
    export DATABASE_URI=$(vault kv get -field=uri secret/database)
-
+```
 3. **Per-Profile Configuration**:
+```
    # Development
    export MCP_PROFILE=development
    export DATABASE_URI="postgresql://localhost/dev"
@@ -520,12 +527,13 @@ Runtime Dynamic Config
    # Production  
    export MCP_PROFILE=production
    export DATABASE_URI="postgresql://prod-host/db"
-
+```
 ### 3.2 Server Discovery and Selection Mechanisms
 
 **Discovery Patterns**[28][39]:
 
 1. **Static Registry**:
+```
    const SERVER_REGISTRY = {
      "database": {
        "postgresql": "uvx postgres-mcp",
@@ -537,8 +545,9 @@ Runtime Dynamic Config
        "gcp": "npx @google-cloud/mcp-server"
      }
    };
-
+```
 2. **Dynamic Discovery via OAuth Metadata**[28][67]:
+```
    async function discoverMCPServer(serverUrl: string): ServerMetadata {
      // 1. Fetch OAuth Protected Resource metadata
      const metadata = await fetch(
@@ -558,8 +567,9 @@ Runtime Dynamic Config
        scopes: metadata.scopes_supported
      };
    }
-
+```
 3. **Agent-Driven Configuration**[39]:
+```
    class AgenticMCPConfiguration {
      async autoConfigureServers(task: DevelopmentTask) {
        // 1. Analyze task requirements
@@ -576,13 +586,13 @@ Runtime Dynamic Config
        }
      }
    }
-
+```
 ### 3.3 Authentication and Secrets Management
 
 **OAuth 2.1 Implementation**[62][67][70]:
 
 **Server-Side (MCP Server as Resource Server)**:
-
+```
 // 1. Expose Protected Resource Metadata
 app.get('/.well-known/oauth-protected-resource', (req, res) => {
   res.json({
@@ -631,9 +641,9 @@ app.post('/tools/:toolName', async (req, res) => {
   const result = await tool.execute(req.body, tokenInfo.userId);
   res.json(result);
 });
-
+```
 **Client-Side (MCP Client OAuth Flow)**[70]:
-
+```
 class MCPOAuthClient {
   async connectServer(serverUrl: string): MCPConnection {
     // 1. Discover OAuth endpoints
@@ -721,11 +731,11 @@ class MCPOAuthClient {
      "execute_query": ["database:read"],
      "modify_schema": ["database:write", "database:admin"]
    };
-
+```
 ### 3.4 User Context Injection
 
 **Context Propagation Pattern**[39][42]:
-
+```
 interface UserContext {
   userId: string;
   role: string;
@@ -755,9 +765,9 @@ class ContextAwareMCPClient {
     return await this.mcpClient.callTool(toolName, enrichedParams);
   }
 }
-
+```
 **Per-Project/Tenant Configuration**[42]:
-
+```
 # .mcp/config.yaml
 project:
   id: "project-123"
@@ -771,7 +781,7 @@ servers:
   storage:
     bucket: "${PROJECT_BUCKET}"
     prefix: "tenant/${TENANT_ID}/"   # Namespace isolation
-
+```
 ---
 
 ## 4. Error Handling, Observability, and Reliability
@@ -793,7 +803,7 @@ servers:
 | | Rate limit | Queue request, apply backpressure to agent |
 
 **Unified Error Handling Framework**:
-
+```
 class MultiProtocolErrorHandler {
   async executeWithRetry<T>(
     operation: () => Promise<T>,
@@ -853,11 +863,11 @@ class MultiProtocolErrorHandler {
     }
   }
 }
-
+```
 ### 4.2 Distributed Tracing and Observability
 
 **OpenTelemetry Integration**[74]:
-
+```
 import { trace, context, SpanStatusCode } from '@opentelemetry/api';
 
 class ObservableMultiAgentSystem {
@@ -926,9 +936,9 @@ class ObservableMultiAgentSystem {
     });
   }
 }
-
+```
 **Structured Logging Pattern**:
-
+```
 interface LogEntry {
   timestamp: string;
   level: 'debug' | 'info' | 'warn' | 'error';
@@ -971,11 +981,11 @@ logger.log({
     userId: context.userId
   }
 });
-
+```
 ### 4.3 Health Checks and Graceful Degradation
 
 **Health Check Pattern**:
-
+```
 interface HealthCheck {
   protocol: string;
   component: string;
@@ -1044,9 +1054,9 @@ class HealthMonitor {
     );
   }
 }
-
+```
 **Graceful Degradation Strategy**:
-
+```
 class AdaptiveSystemOrchestrator {
   async executeWithDegradation(task: Task): Result {
     const health = await this.healthMonitor.getOverallHealth();
@@ -1072,7 +1082,7 @@ class AdaptiveSystemOrchestrator {
     return await this.execute(task);
   }
 }
-
+```
 ---
 
 ## 5. Security, Isolation, and Trust
@@ -1080,7 +1090,7 @@ class AdaptiveSystemOrchestrator {
 ### 5.1 Server Identity Verification
 
 **MCP Server Verification**[3][4][5][9]:
-
+```
 class SecureMCPClient {
   async verifyServerIdentity(serverUrl: string): VerificationResult {
     // 1. Fetch server metadata
@@ -1119,9 +1129,9 @@ class SecureMCPClient {
     };
   }
 }
-
+```
 **Server Allowlist Pattern**[76]:
-
+```
 // .mcp/trusted-servers.yaml
 trustedServers:
   - serverId: "com.github/github-mcp"
@@ -1143,11 +1153,11 @@ trustedServers:
     allowedNetworks: ["10.0.0.0/8"]
 
 allowlistMode: "strict"  # Reject any server not in this list
-
+```
 ### 5.2 Least-Privilege Access Control
 
 **Scope-Based Authorization**[62][67]:
-
+```
 interface ScopeDefinition {
   scope: string;
   description: string;
@@ -1212,9 +1222,9 @@ class ScopeEnforcement {
     return { authorized: true };
   }
 }
-
+```
 **Dynamic Scope Elevation**[61][67]:
-
+```
 class DynamicScopeManager {
   async executeWithMinimalPrivilege(tool: Tool, params: any) {
     // 1. Start with minimal scopes
@@ -1244,11 +1254,11 @@ class DynamicScopeManager {
     }
   }
 }
-
+```
 ### 5.3 Sandboxing and Isolation
 
 **MCP Server Sandboxing**[5][9]:
-
+```
 class SandboxedMCPServer {
   async startSandboxed(serverConfig: MCPServerConfig): ServerProcess {
     // 1. Create isolated environment
@@ -1289,9 +1299,9 @@ class SandboxedMCPServer {
     }));
   }
 }
-
+```
 **Agent Isolation Pattern**[35]:
-
+```
 class IsolatedAgentExecutor {
   async executeAgent(agent: Agent, task: Task): Result {
     // 1. Create isolated workspace
@@ -1330,11 +1340,11 @@ class IsolatedAgentExecutor {
     };
   }
 }
-
+```
 ### 5.4 Mitigating Malicious MCP Servers
 
 **Detection Mechanisms**[3][4][5]:
-
+```
 1. **Static Analysis of MCP Server Code**:
    class MCPServerScanner {
      async scanForVulnerabilities(serverCode: string): ScanResult {
@@ -1443,7 +1453,7 @@ class IsolatedAgentExecutor {
        return consent;
      }
    }
-
+```
 ---
 
 ## 6. Performance Optimization
@@ -1451,7 +1461,7 @@ class IsolatedAgentExecutor {
 ### 6.1 Connection Reuse and Pooling
 
 **LSP Connection Management**:
-
+```
 class LSPConnectionPool {
   private connections: Map<string, LSPConnection> = new Map();
   private maxConnections = 10;
@@ -1489,9 +1499,9 @@ class LSPConnectionPool {
     return connection;
   }
 }
-
+```
 **MCP Connection Pooling**[42]:
-
+```
 class MCPConnectionPool {
   private pools: Map<string, Connection[]> = new Map();
   private config = {
@@ -1547,11 +1557,11 @@ class MCPConnectionPool {
     }
   }
 }
-
+```
 ### 6.2 Caching Strategies
 
 **LSP Response Caching**:
-
+```
 class LSPResponseCache {
   private cache: Map<string, CacheEntry> = new Map();
   private ttl = 5000;  // 5 seconds
@@ -1594,9 +1604,9 @@ const diagnostics = await cache.getOrCompute(
   () => lsp.getDiagnostics(fileUri),
   [fileUri]  // Invalidate when this file changes
 );
-
+```
 **MCP Tool Result Caching**:
-
+```
 class MCPResultCache {
   async callToolWithCache(
     serverId: string,
@@ -1629,11 +1639,11 @@ class MCPResultCache {
     return result;
   }
 }
-
+```
 ### 6.3 Streaming and Progressive Results
 
 **LSP Incremental Updates**[45]:
-
+```
 class IncrementalLSPClient {
   async trackDocumentChanges(document: TextDocument) {
     // Send full document on open
@@ -1659,9 +1669,9 @@ class IncrementalLSPClient {
     });
   }
 }
-
+```
 **MCP Streaming Results**[28][35]:
-
+```
 class StreamingMCPClient {
   async streamToolResult(
     serverId: string,
@@ -1706,11 +1716,11 @@ await mcpClient.streamToolResult(
     progressBar.update(chunk.progress);
   }
 );
-
+```
 ### 6.4 Concurrency Control and Backpressure
 
 **Agent Concurrency Limits**[65][68]:
-
+```
 class ConcurrencyController {
   private maxConcurrentAgents = 5;
   private activeAgents = 0;
@@ -1746,9 +1756,9 @@ class ConcurrencyController {
     }
   }
 }
-
+```
 **MCP Backpressure Handling**:
-
+```
 class BackpressureController {
   private serverLoad: Map<string, LoadMetrics> = new Map();
   private thresholds = {
@@ -1794,7 +1804,7 @@ class BackpressureController {
     await new Promise(resolve => setTimeout(resolve, delayMs));
   }
 }
-
+```
 ---
 
 ## 7. Reference Architectures and Sequence Diagrams
@@ -1802,19 +1812,19 @@ class BackpressureController {
 ### 7.1 ACP Router with Shared LSP/MCP Pool
 
 **Architecture Diagram**:
-
+```
 ┌──────────────────────────────────────────────────────────────┐
-│                    Client Application                         │
+│                    Client Application                        │
 │                  (VS Code Extension / CLI)                   │
 └──────────────────────────────────────────────────────────────┘
                             │
                             ▼
-        ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+        ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━─━━┓
         ┃       ACP Router Agent (Orchestrator) ┃
         ┃  • Request decomposition              ┃
         ┃  • Agent selection & routing          ┃
         ┃  • Result aggregation                 ┃
-        ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+        ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━─━━┛
              │              │              │
              │ ACP          │ ACP          │ ACP
              ▼              ▼              ▼
@@ -1827,16 +1837,16 @@ class BackpressureController {
                             │
            ┌────────────────┴────────────────┐
            │                                 │
-    ┌──────▼──────┐                   ┌─────▼──────┐
-    │  LSP Pool   │                   │  MCP Pool  │
-    │             │                   │            │
-    │ • Python LS │                   │ • GitHub   │
-    │ • TypeScript│                   │ • Database │
-    │ • Go LS     │                   │ • FileSystem│
-    └─────────────┘                   └────────────┘
-
+    ┌──────▼──────┐                   ┌──────▼───────┐
+    │  LSP Pool   │                   │  MCP Pool    │
+    │             │                   │              │
+    │ • Python LS │                   │ • GitHub     │
+    │ • TypeScript│                   │ • Database   │
+    │ • Go LS     │                   │ • FileSystem │
+    └─────────────┘                   └──────────────┘
+```
 **Sequence Diagram**:
-
+```
 sequenceDiagram
     participant User
     participant Router as ACP Router
@@ -1871,11 +1881,11 @@ sequenceDiagram
     CodeGen-->>Router: Task complete: PR #123
     
     Router-->>User: "Authentication added in PR #123"
-
+```
 ### 7.2 Developer-in-the-Loop Continuous Improvement
 
 **Sequence Diagram**:
-
+```
 sequenceDiagram
     participant Dev as Developer
     participant IDE as IDE (VS Code)
@@ -1927,7 +1937,7 @@ sequenceDiagram
     LSP-->>IDE: publishDiagnostics (no errors)
     
     IDE-->>Dev: ✓ Error fixed
-
+```
 ---
 
 ## 8. Implementation Guidelines for Production-Grade MCP Servers
@@ -1935,7 +1945,7 @@ sequenceDiagram
 ### 8.1 Configuration Strategies
 
 **Server.json Standard**[39]:
-
+```
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-09-29/server.schema.json",
   "name": "com.example/production-mcp-server",
@@ -1978,9 +1988,9 @@ sequenceDiagram
     ]
   }]
 }
-
+```
 **Multi-Environment Configuration**[39]:
-
+```
 class ConfigurationManager {
   private configs: Map<string, ServerConfig> = new Map();
   
@@ -2038,11 +2048,11 @@ class ConfigurationManager {
     }
   }
 }
-
+```
 ### 8.2 Versioning and Compatibility
 
 **Semantic Versioning**[39]:
-
+```
 interface ServerVersion {
   major: number;  // Breaking changes
   minor: number;  // New features (backward compatible)
@@ -2093,11 +2103,11 @@ class VersionManager {
     throw new Error('No compatible version found');
   }
 }
-
+```
 ### 8.3 Health Checks and Monitoring
 
 **Health Check Endpoint**:
-
+```
 interface HealthStatus {
   status: 'healthy' | 'degraded' | 'unhealthy';
   version: string;
@@ -2152,9 +2162,9 @@ class HealthCheckManager {
     }
   }
 }
-
+```
 **Metrics Collection**:
-
+```
 class MetricsCollector {
   private metrics = {
     toolCalls: new Counter('mcp_tool_calls_total'),
@@ -2177,11 +2187,11 @@ class MetricsCollector {
     return await this.metrics.registry.metrics();
   }
 }
-
+```
 ### 8.4 Graceful Degradation and Circuit Breakers
 
 **Circuit Breaker Pattern**:
-
+```
 class CircuitBreaker {
   private state: 'closed' | 'open' | 'half-open' = 'closed';
   private failures = 0;
@@ -2235,7 +2245,7 @@ const breaker = new CircuitBreaker();
 const result = await breaker.execute(() => 
   this.callExternalAPI()
 );
-
+```
 ---
 
 ## 9. Common Failure Modes and Anti-Patterns
@@ -2243,7 +2253,7 @@ const result = await breaker.execute(() =>
 ### 9.1 Tight Coupling to Specific MCP Servers
 
 **Anti-Pattern**:
-
+```
 // ❌ BAD: Hardcoded dependency on specific MCP server
 class CodeGenerationAgent {
   async generateCode(spec: Specification) {
@@ -2257,9 +2267,9 @@ class CodeGenerationAgent {
     return this.synthesize(examples);
   }
 }
-
+```
 **Best Practice**:
-
+```
 // ✅ GOOD: Abstract capability, discover implementation
 interface CodeSearchCapability {
   searchCode(query: string): Promise<CodeExample[]>;
@@ -2292,11 +2302,11 @@ class CapabilityResolver {
     throw new Error('No code search capability available');
   }
 }
-
+```
 ### 9.2 Unbounded Tool Invocation
 
 **Anti-Pattern**:
-
+```
 // ❌ BAD: No limits on tool calls
 class Agent {
   async execute(task: Task) {
@@ -2307,9 +2317,9 @@ class Agent {
     }
   }
 }
-
+```
 **Best Practice**:
-
+```
 // ✅ GOOD: Bounded execution with budget
 class Agent {
   private config = {
@@ -2353,20 +2363,20 @@ class Agent {
     };
   }
 }
-
+```
 ### 9.3 Poor Server Naming Leading to Mis-Selection
 
 **Anti-Pattern**:
-
+```
 // ❌ BAD: Ambiguous server names
 mcpServers: {
   "server1": { command: "npx database-server" },
   "server2": { command: "npx api-server" },
   "prod": { command: "npx production-server" }
 }
-
+```
 **Best Practice**:
-
+```
 // ✅ GOOD: Descriptive, namespaced names
 mcpServers: {
   "com.company.database.postgresql": {
@@ -2388,9 +2398,9 @@ mcpServers: {
     environment: "all"
   }
 }
-
+```
 **Discovery Enhancement**:
-
+```
 class SmartServerSelector {
   async selectBestServer(
     requiredCapability: string,
@@ -2430,20 +2440,20 @@ class SmartServerSelector {
     return score;
   }
 }
-
+```
 ### 9.4 Insufficient Observability
 
 **Anti-Pattern**:
-
+```
 // ❌ BAD: Silent failures, no tracing
 async function executeMultiAgentWorkflow(task: Task) {
   const agent1Result = await agent1.execute(task.subtask1);
   const agent2Result = await agent2.execute(task.subtask2);
   return combine(agent1Result, agent2Result);
 }
-
+```
 **Best Practice**:
-
+```
 // ✅ GOOD: Comprehensive instrumentation
 import { trace, context } from '@opentelemetry/api';
 
@@ -2535,7 +2545,7 @@ async function executeMultiAgentWorkflow(task: Task) {
     }
   });
 }
-
+```
 ---
 
 ## 10. Conclusion and Recommendations
