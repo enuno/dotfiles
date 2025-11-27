@@ -1,4 +1,14 @@
-P): Tool and Data Access Layer
+# Architecting Multi-Agent Software Development Environments: A Technical Framework for ACP, LSP, and MCP Integration
+
+**Executive Summary**
+
+This research report provides a comprehensive technical framework for architecting production-grade multi-agent software development environments that integrate Agent Client Protocol (ACP), Language Server Protocol (LSP), and Model Context Protocol (MCP). Drawing from recent academic research[1][2][3][4], industry implementations[5][6], and protocol specifications[7][8][9], this document targets senior engineers and architects designing autonomous or semi-autonomous AI-assisted development environments.
+
+---
+
+## 1. Protocol Foundations: Systems Architecture and Interoperability
+
+### 1.1 Model Context Protocol (MCP): Tool and Data Access Layer
 
 **Architectural Role**: MCP serves as the standardized interface between AI models and external data sources/tools, functioning as the **tool execution and context provisioning layer** in multi-agent systems[7][8][10].
 
@@ -9,17 +19,7 @@ P): Tool and Data Access Layer
 
 **Three Core Primitives**[35]:
 
-1. **Resources** (Context Provision): Read-only data acces# Architecting Multi-Agent Software Development Environments: A Technical Framework for ACP, LSP, and MCP Integration
-
-**Executive Summary**
-
-This research report provides a comprehensive technical framework for architecting production-grade multi-agent software development environments that integrate Agent Client Protocol (ACP), Language Server Protocol (LSP), and Model Context Protocol (MCP). Drawing from recent academic research[1][2][3][4], industry implementations[5][6], and protocol specifications[7][8][9], this document targets senior engineers and architects designing autonomous or semi-autonomous AI-assisted development environments.
-
----
-
-## 1. Protocol Foundations: Systems Architecture and Interoperability
-
-### 1.1 Model Context Protocol (MCs (documents, database records, search results)
+1. **Resources** (Context Provision): Read-only data access (documents, database records, search results)
    - Function: Provide contextual data for LLM consumption
    - Analogy: GET endpoints in REST APIs
    
